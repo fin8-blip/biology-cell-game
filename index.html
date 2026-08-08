@@ -499,22 +499,51 @@
             color: var(--white);
         }
 
-        .speaker-btn {
-            background: var(--secondary);
-            padding: 10px 20px;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 1.5em;
-            display: inline-flex;
+        .tts-letter-box {
+            width: 40px;
+            height: 50px;
+            border: 2px solid var(--dark);
+            border-radius: 8px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--dark);
+            background: var(--white);
+            transition: all 0.2s ease;
         }
 
-        .speaker-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .tts-letter-box.filled {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .tts-letter-box.correct-letter {
+            background: #2ecc71;
+            color: white;
+            border-color: #27ae60;
+            animation: popIn 0.3s ease;
+        }
+
+        .tts-letter-box.wrong-letter {
+            background: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
     </style>
 </head>
@@ -554,8 +583,8 @@
                         <div>Quiz</div>
                     </button>
                     <button class="mode-card tts" onclick="startTTS()">
-                        <div class="icon">🎧</div>
-                        <div>TTS Challenge</div>
+                        <div class="icon">✏️</div>
+                        <div>Teka Teaki Silang</div>
                     </button>
                 </div>
             </div>
@@ -610,19 +639,19 @@
             <!-- TTS Screen -->
             <div id="tts-screen" class="hidden">
                 <div class="tts-container">
-                    <h3 style="margin-bottom: 15px;">🎧 TTS Challenge</h3>
-                    <p style="color: #666; margin-bottom: 20px;">Dengarkan definisi, lalu tebak nama organelnya!</p>
-                    
-                    <div style="margin: 20px 0;">
-                        <button class="btn btn-primary speaker-btn" id="speak-btn" onclick="speakDefinition()">🔊</button>
-                        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Klik untuk putar audio</p>
+                    <h3 style="margin-bottom: 10px;">✏️ Teka Teaki Silang</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Isi huruf-huruf yang tepat berdasarkan petunjuk!</p>
+
+                    <div style="background: var(--light); padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                        <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">PETUNJUK:</div>
+                        <div id="tts-clue" style="font-weight: bold; font-size: 1.1em; color: var(--dark);">Loading...</div>
                     </div>
 
-                    <div class="tts-options" id="tts-options"></div>
+                    <div id="tts-letter-boxes" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0;"></div>
 
                     <div style="margin-top: 20px;">
-                        <input type="text" class="tts-input" id="tts-input" placeholder="Ketik jawaban atau pilih di bawah...">
-                        <button class="btn btn-primary" onclick="checkTTSAnswer()" style="width: 100%;">✔ Kirim Jawaban</button>
+                        <input type="text" class="tts-input" id="tts-input" placeholder="Ketik jawaban..." maxlength="20">
+                        <button class="btn btn-primary" onclick="checkTTSAnswer()" style="width: 100%; margin-top: 10px;">✔ Cek Jawaban</button>
                     </div>
 
                     <div id="tts-feedback" style="margin-top: 15px; padding: 15px; border-radius: 10px; display: none;"></div>
@@ -1148,7 +1177,9 @@
             startQuiz();
         }
 
-        // ==================== TTS CHALLENGE ====================
+        // ==================== TEKA TEKI SILANG ====================
+        let ttsAnswer = '';
+
         function startTTS() {
             state.mode = 'tts';
             showScreen('tts-screen');
@@ -1158,54 +1189,57 @@
         function loadTTSQuestion() {
             const deck = biologyData[state.deck] || biologyData.organelles;
             state.ttsItem = deck[Math.floor(Math.random() * deck.length)];
+            ttsAnswer = state.ttsItem.term;
+
             document.getElementById('tts-input').value = '';
             document.getElementById('tts-feedback').style.display = 'none';
-            document.getElementById('speak-btn').disabled = false;
+            document.getElementById('tts-clue').textContent = state.ttsItem.hint || state.ttsItem.definition || state.ttsItem.comparison || '';
 
-            const options = generateTTTOptions(state.ttsItem);
-            const container = document.getElementById('tts-options');
+            renderLetterBoxes(ttsAnswer);
+        }
+
+        function renderLetterBoxes(answer) {
+            const container = document.getElementById('tts-letter-boxes');
             container.innerHTML = '';
 
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-option';
-                btn.textContent = opt;
-                btn.onclick = () => checkTTSItem(opt);
-                container.appendChild(btn);
+            const letters = answer.replace(/\s+/g, ' ').split('');
+            letters.forEach((letter, index) => {
+                const box = document.createElement('div');
+                box.className = 'tts-letter-box';
+                box.textContent = letter === ' ' ? '' : '_';
+                box.dataset.index = index;
+                if (letter === ' ') {
+                    box.style.width = '20px';
+                    box.style.border = 'none';
+                    box.style.background = 'transparent';
+                }
+                container.appendChild(box);
             });
-        }
-
-        function generateTTTOptions(correctItem) {
-            const deck = biologyData[state.deck] || biologyData.organelles;
-            const wrongAnswers = deck.filter(item => item.term !== correctItem.term);
-            const shuffled = wrongAnswers.sort(() => Math.random() - 0.5);
-            const options = [correctItem.term, ...shuffled.slice(0, 3).map(i => i.term)];
-            return options.sort(() => Math.random() - 0.5);
-        }
-
-        function speakDefinition() {
-            if (!state.ttsItem) return;
-            const text = state.ttsItem.definition;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'id-ID';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            speechSynthesis.speak(utterance);
-            document.getElementById('speak-btn').disabled = true;
-            setTimeout(() => {
-                document.getElementById('speak-btn').disabled = false;
-            }, 3000);
         }
 
         function checkTTSAnswer() {
             const input = document.getElementById('tts-input').value.trim();
             if (!input) return;
-            checkTTSItem(input);
-        }
 
-        function checkTTSItem(answer) {
             const feedback = document.getElementById('tts-feedback');
-            const isCorrect = answer.toLowerCase() === state.ttsItem.term.toLowerCase();
+            const isCorrect = input.toLowerCase() === ttsAnswer.toLowerCase();
+
+            const boxes = document.querySelectorAll('.tts-letter-box');
+            const inputLetters = input.split('');
+            
+            boxes.forEach((box, index) => {
+                box.classList.remove('filled', 'correct-letter', 'wrong-letter');
+                if (index < inputLetters.length && box.dataset.index !== undefined && box.dataset.index !== '') {
+                    const expectedLetter = ttsAnswer.replace(/\s+/g, ' ').split(' ').join('').split('')[index] || '';
+                    if (inputLetters[index].toLowerCase() === expectedLetter.toLowerCase() && expectedLetter !== '') {
+                        box.classList.add('correct-letter');
+                        box.textContent = expectedLetter;
+                    } else if (expectedLetter !== '') {
+                        box.classList.add('wrong-letter');
+                        box.textContent = inputLetters[index];
+                    }
+                }
+            });
 
             if (isCorrect) {
                 state.score += 30;
@@ -1213,7 +1247,7 @@
                 if (state.streak > state.bestStreak) state.bestStreak = state.streak;
                 feedback.style.display = 'block';
                 feedback.className = 'quiz-feedback correct';
-                feedback.textContent = `✅ Benar! Itu ${state.ttsItem.term}! +30 poin`;
+                feedback.textContent = `✅ Benar! Itu ${ttsAnswer}! +30 poin`;
                 state.learned.add(state.ttsItem.term + '-' + state.deck);
                 updateScoreDisplay();
                 saveProgress();
@@ -1221,7 +1255,9 @@
                 state.streak = 0;
                 feedback.style.display = 'block';
                 feedback.className = 'quiz-feedback wrong';
-                feedback.textContent = `❌ Salah! Jawaban: ${state.ttsItem.term}`;
+                feedback.textContent = `❌ Salah! Jawaban yang benar: ${ttsAnswer}`;
+                updateScoreDisplay();
+                saveProgress();
             }
 
             setTimeout(() => {
