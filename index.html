@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioCell - Belajar Sel Hewan & Tumbuhan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .score-bar {
+            background: var(--dark);
+            color: var(--white);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .score-bar span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        main {
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        .mode-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mode-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+        }
+
+        .mode-card.quiz {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+        }
+
+        .mode-card.tts {
+            background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+        }
+
+        .mode-card .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 20px auto;
+            cursor: pointer;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            border-radius: 15px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--white);
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .flashcard-term {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .flashcard-definition {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .flashcard-function {
+            margin-top: 15px;
+            font-style: italic;
+            opacity: 0.95;
+        }
+
+        .flashcard-hint {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: var(--white);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quiz-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .quiz-question {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--dark);
+            text-align: center;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px 20px;
+            background: var(--light);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            text-align: left;
+        }
+
+        .quiz-option:hover {
+            background: #d5dbdb;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .quiz-option.wrong {
+            background: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
+        }
+
+        .quiz-feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .quiz-feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .quiz-feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .quiz-explanation {
+            margin-top: 10px;
+            font-weight: normal;
+            font-size: 0.95em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--light);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .timer.warning {
+            color: var(--danger);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .tts-container {
+            text-align: center;
+        }
+
+        .tts-text {
+            font-size: 1.2em;
+            color: var(--dark);
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tts-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--light);
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .tts-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tts-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .back-btn {
+            background: var(--dark);
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-screen h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .result-screen .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .result-screen .message {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-box .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            .flashcard-container {
+                height: 250px;
+            }
+
+            .flashcard-term {
+                font-size: 1.4em;
+            }
+
+            .mode-menu {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .category-select {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .category-btn {
+            padding: 15px;
+            border: 2px solid var(--light);
+            background: var(--white);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .category-btn:hover {
+            border-color: var(--primary);
+            background: #f8f9fa;
+        }
+
+        .category-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .speaker-btn {
+            background: var(--secondary);
+            padding: 10px 20px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+        }
+
+        .speaker-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 BioCell</h1>
+            <p>Belajar Sel Hewan & Tumbuhan - Kelas 11</p>
+        </header>
+
+        <div class="score-bar">
+            <span>⭐ Skor: <strong id="score">0</strong></span>
+            <span>🔥 Streak: <strong id="streak">0</strong></span>
+            <span>📚 Dipelajari: <strong id="learned">0</strong></span>
+        </div>
+
+        <main id="app">
+            <!-- Menu -->
+            <div id="menu-screen">
+                <h2 style="text-align: center; margin-bottom: 10px;">Pilih Mode Belajar</h2>
+                <p style="text-align: center; color: #666;">Pilih topik yang ingin dipelajari</p>
+                
+                <div class="category-select" id="category-select">
+                    <button class="category-btn active" data-category="organelles">🧬 Organel Sel</button>
+                    <button class="category-btn" data-category="plant-vs-animal">🌱 Sel Hewan vs Tumbuhan</button>
+                    <button class="category-btn" data-category="membrane">🔲 Membran Sel</button>
+                    <button class="category-btn" data-category="photosynthesis">☀️ Fotosintesis</button>
+                </div>
+
+                <div class="mode-menu">
+                    <button class="mode-card" onclick="startFlashcard()">
+                        <div class="icon">🎴</div>
+                        <div>Flashcard</div>
+                    </button>
+                    <button class="mode-card quiz" onclick="startQuiz()">
+                        <div class="icon">📝</div>
+                        <div>Quiz</div>
+                    </button>
+                    <button class="mode-card tts" onclick="startTTS()">
+                        <div class="icon">🎧</div>
+                        <div>TTS Challenge</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard Screen -->
+            <div id="flashcard-screen" class="hidden">
+                <h3 style="text-align: center; margin-bottom: 15px;">Flashcard Mode</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="flashcard-progress" style="width: 0%"></div>
+                </div>
+                <div class="flashcard-container" onclick="flipCard()">
+                    <div class="flashcard" id="flashcard">
+                        <div class="flashcard-face flashcard-front">
+                            <div class="flashcard-emoji" id="fc-emoji">🧬</div>
+                            <div class="flashcard-term" id="fc-term">Nukleus</div>
+                            <p style="opacity: 0.8; margin-top: 10px;">Klik untuk melihat definisi</p>
+                        </div>
+                        <div class="flashcard-face flashcard-back">
+                            <div class="flashcard-emoji" id="fc-emoji-back">🧬</div>
+                            <div class="flashcard-definition" id="fc-definition">Definisi</div>
+                            <div class="flashcard-function" id="fc-function">Fungsi</div>
+                            <div class="flashcard-hint" id="fc-hint">💡 Tips</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flashcard-controls">
+                    <button class="btn btn-secondary" onclick="prevFlashcard()">◀ Sebelum</button>
+                    <button class="btn btn-primary" onclick="nextFlashcard()">Sesudah ▶</button>
+                    <button class="btn btn-warning" onclick="markMastered()">✓ Hafal</button>
+                </div>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    Kartu <span id="fc-current">1</span> dari <span id="fc-total">10</span>
+                </p>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quiz-screen" class="hidden">
+                <div class="timer" id="quiz-timer">15</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="quiz-progress" style="width: 0%"></div>
+                </div>
+                <div class="quiz-container">
+                    <div class="quiz-question" id="quiz-question">Pertanyaan loading...</div>
+                    <div class="quiz-options" id="quiz-options"></div>
+                    <div class="quiz-feedback" id="quiz-feedback"></div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn back-btn" onclick="showMenu()">← Kembali ke Menu</button>
+                </div>
+            </div>
+
+            <!-- TTS Screen -->
+            <div id="tts-screen" class="hidden">
+                <div class="tts-container">
+                    <h3 style="margin-bottom: 15px;">🎧 TTS Challenge</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Dengarkan definisi, lalu tebak nama organelnya!</p>
+                    
+                    <div style="margin: 20px 0;">
+                        <button class="btn btn-primary speaker-btn" id="speak-btn" onclick="speakDefinition()">🔊</button>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Klik untuk putar audio</p>
+                    </div>
+
+                    <div class="tts-options" id="tts-options"></div>
+
+                    <div style="margin-top: 20px;">
+                        <input type="text" class="tts-input" id="tts-input" placeholder="Ketik jawaban atau pilih di bawah...">
+                        <button class="btn btn-primary" onclick="checkTTSAnswer()" style="width: 100%;">✔ Kirim Jawaban</button>
+                    </div>
+
+                    <div id="tts-feedback" style="margin-top: 15px; padding: 15px; border-radius: 10px; display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen" class="hidden">
+                <div class="result-screen">
+                    <h2>🎉 Quiz Selesai!</h2>
+                    <div class="score-display" id="final-score">0</div>
+                    <div class="message" id="result-message">Bagus!</div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="value" id="stat-correct">0</div>
+                            <div class="label">Benar</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="value" id="stat-total">0</div>
+                            <div class="label">Total Soal</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="value" id="stat-accuracy">0%</div>
+                            <div class="label">Akurasi</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="value" id="stat-best">0</div>
+                            <div class="label">Best Streak</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showMenu()">🏠 Menu Utama</button>
+                    <button class="btn btn-secondary" onclick="restartQuiz()" style="margin-left: 10px;">🔄 Main Lagi</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        const biologyData = {
+            organelles: [
+                {
+                    term: "Nukleus",
+                    definition: "Pusat kendali sel yang menyimpan materi genetik (DNA)",
+                    function: "Mengatur aktivitas sel, sintesis protein, dan pembelahan sel",
+                    hint: "Berbentuk bulat, dikelilingi oleh membran inti (nukleus)",
+                    emoji: "🔵",
+                    category: "organelles"
+                },
+                {
+                    term: "Mitokondria",
+                    definition: "Pelayan energi sel yang melakukan respirasi seluler",
+                    function: "Menghasilkan ATP melalui proses respirasi aerob",
+                    hint: "Bentuk kacau, banyak di sel yang butuh banyak energi",
+                    emoji: "🔋",
+                    category: "organelles"
+                },
+                {
+                    term: "Ribosom",
+                    definition: "Tempat sintesis protein dari asam amino",
+                    function: "Menerjemahkan kode genetik menjadi rantai polipeptida",
+                    hint: "Tidak punya membran, bisa bebas atau menempel RE",
+                    emoji: "⚙️",
+                    category: "organelles"
+                },
+                {
+                    term: "Retikulum Endoplasma",
+                    definition: "Jaringan membran untuk transportasi protein dan lipid",
+                    function: "MER: sintesis protein, SER: sintesis lipid & detoksifikasi",
+                    hint: "Ada dua jenis: kasar (RER) dan halus (SER)",
+                    emoji: "🌀",
+                    category: "organelles"
+                },
+                {
+                    term: "Badan Golgi",
+                    definition: "Pusat pengemasan dan distribusi protein",
+                    function: "Memodifikasi, mengemas, dan mengirim protein ke targetnya",
+                    hint: "Bentuk tumpukan kantong pipih, seperti stack piring",
+                    emoji: "📦",
+                    category: "organelles"
+                },
+                {
+                    term: "Lisosom",
+                    definition: "Kantong enzim untuk daur ulang sel",
+                    function: "Mencerna zat sisa, membran sel, dan organel tua (autofagi)",
+                    hint: "Hanya ada di sel hewan, berisi enzim hidrolitik",
+                    emoji: "🗑️",
+                    category: "organelles"
+                },
+                {
+                    term: "Sentriol",
+                    definition: "Struktur silinder yang berperan dalam pembelahan sel",
+                    function: "Membentuk benang spindle untuk memisahkan kromosom",
+                    hint: "Berada dekat nukleus, hanya pada sel hewan",
+                    emoji: "🔧",
+                    category: "organelles"
+                },
+                {
+                    term: "Kloroplas",
+                    definition: "Organel fotosintesis pada sel tumbuhan",
+                    function: "Mengubah energi cahaya menjadi energi kimia (glukosa)",
+                    hint: "Hanya ada di tumbuhan, berisi klorofil (hijau)",
+                    emoji: "🌿",
+                    category: "organelles"
+                },
+                {
+                    term: "Vakuola",
+                    definition: "Kantong membran untuk penyimpanan",
+                    function: "Menyimpan air, nutrisi, pigmen, atau zat sisa",
+                    hint: "Besar pada tumbuhan (vakuola pusat), kecil pada hewan",
+                    emoji: "🫧",
+                    category: "organelles"
+                },
+                {
+                    term: "Sitoplasma",
+                    definition: "Zool cair di dalam sel di luar nukleus",
+                    function: "Medium tempat reaksi biokimia dan perpindahan zat",
+                    hint: "Terdiri dari sitosol + organel-organel",
+                    emoji: "💧",
+                    category: "organelles"
+                }
+            ],
+            "plant-vs-animal": [
+                {
+                    term: "Dinding Sel",
+                    definition: "Lapisan struktural tebal di luar membran plasma",
+                    function: "Memberi bentuk, perlindungan, dan dukungan pada sel tumbuhan",
+                    comparison: "Tumbuhan: ADA | Hewan: TIDAK ADA",
+                    emoji: "🧱",
+                    category: "plant-vs-animal"
+                },
+                {
+                    term: "Kloroplas",
+                    definition: "Organel yang mengandung klorofil untuk fotosintesis",
+                    function: "Menghasilkan nutrisi dari cahaya matahari",
+                    comparison: "Tumbuhan: ADA | Hewan: TIDAK ADA",
+                    emoji: "🌿",
+                    category: "plant-vs-animal"
+                },
+                {
+                    term: "Vakuola Pusat",
+                    definition: "Vakuola besar yang mengisi 90% volume sel",
+                    function: "Menyimpan air, menjaga turgor sel, dan mengikat pigmen",
+                    comparison: "Tumbuhan: BESAR | Hewan: KECIL/BENDAK",
+                    emoji: "🫧",
+                    category: "plant-vs-animal"
+                },
+                {
+                    term: "Sentriol",
+                    definition: "Struktur silinder untuk pembelahan sel",
+                    function: "Membentuk benang spindle saat mitosis",
+                    comparison: "Tumbuhan: TIDAK ADA | Hewan: ADA",
+                    emoji: "🔧",
+                    category: "plant-vs-animal"
+                },
+                {
+                    term: "Lisosom",
+                    definition: "Kantong enzim hidrolitik untuk daur ulang",
+                    function: "Mencerna zat sisa dan organel tua",
+                    comparison: "Tumbuhan: SEDIKIT | Hewan: BANYAK",
+                    emoji: "🗑️",
+                    category: "plant-vs-animal"
+                },
+                {
+                    term: "Bentuk Sel",
+                    definition: "Bentuk dan struktur sel secara umum",
+                    function: "Hubungan dengan lingkungan dan fungsi sel",
+                    comparison: "Tumbuhan: KOTAK/TERGAMBAR | Hewan: BULAT/TIDAK TERGAMBAR",
+                    emoji: "📐",
+                    category: "plant-vs-animal"
+                }
+            ],
+            membrane: [
+                {
+                    term: "Membran Sel",
+                    definition: "Lapisan ganda fosfolipid yang mengelilingi sel",
+                    function: "Melindungi sel, mengatur masuk-keluar zat, dan recognisi sel",
+                    hint: "Model fluid mosaic: fosfolipid + protein + karbohidrat",
+                    emoji: "🔲",
+                    category: "membrane"
+                },
+                {
+                    term: "Fosfolipid",
+                    definition: "Molekul utama membran dengan kepala polar dan ekor non-polar",
+                    function: "Membentuk bilayer yang impermeable terhadap zat hidrofilik",
+                    hint: "Kepala suka air, ekor benci air",
+                    emoji: "🧴",
+                    category: "membrane"
+                },
+                {
+                    term: "Transport Pasif",
+                    definition: "Pergerakan zat tanpa energi (gradien konsentrasi)",
+                    function: "Difusi, osmosis, difusi terfasilitasi",
+                    hint: "Dari tinggi ke rendah konsentrasi, tidak butuh ATP",
+                    emoji: "⬇️",
+                    category: "membrane"
+                },
+                {
+                    term: "Transport Aktif",
+                    definition: "Pergerakan zat melawan gradien konsentrasi",
+                    function: "Menggunakan ATP dan protein pembawa (pompa)",
+                    hint: "Dari rendah ke tinggi konsentrasi, butuh energi",
+                    emoji: "⬆️",
+                    category: "membrane"
+                },
+                {
+                    term: "Osmosis",
+                    definition: "Difusi air melalui membran semipermeabel",
+                    function: "Menyeimbangkan konsentrasi zat terlarut",
+                    hint: "Air bergerak dari larutan encer ke pekat",
+                    emoji: "💧",
+                    category: "membrane"
+                }
+            ],
+            photosynthesis: [
+                {
+                    term: "Fotosintesis",
+                    definition: "Proses menghasilkan glukosa dari CO₂ dan H₂O menggunakan cahaya",
+                    function: "Menghasilkan oksigen dan glukosa sebagai sumber energi tumbuhan",
+                    hint: "6CO₂ + 6H₂O + cahaya → C₆H₁₂O₆ + 6O₂",
+                    emoji: "☀️",
+                    category: "photosynthesis"
+                },
+                {
+                    term: "Klorofil",
+                    definition: "Pigmen hijau yang menyerap cahaya merah dan biru",
+                    function: "Menangkap energi cahaya untuk reaksi terang",
+                    hint: "Terletak pada tilakoid kloroplas",
+                    emoji: "🌱",
+                    category: "photosynthesis"
+                },
+                {
+                    term: "Reaksi Terang",
+                    definition: "Tahap fotosintesis yang memerlukan cahaya",
+                    function: "Menghasilkan ATP dan NADPH dari energi cahaya",
+                    hint: "Terjadi di tilakoid, butuh H₂O, hasilkan O₂",
+                    emoji: "💡",
+                    category: "photosynthesis"
+                },
+                {
+                    term: "Siklus Calvin",
+                    definition: "Tahap fotosintesis yang tidak memerlukan cahaya",
+                    function: "Menggunakan ATP dan NADPH untuk membuat glukosa",
+                    hint: "Terjadi di stroma, menggunakan CO₂",
+                    emoji: "🔄",
+                    category: "photosynthesis"
+                }
+            ]
+        };
+
+        // ==================== STATE ====================
+        const state = {
+            mode: 'menu',
+            score: 0,
+            streak: 0,
+            bestStreak: 0,
+            currentQuestion: 0,
+            selectedAnswer: null,
+            showResult: false,
+            flashcardIndex: 0,
+            isFlipped: false,
+            deck: 'organelles',
+            quizQuestions: [],
+            correctAnswers: 0,
+            timerInterval: null,
+            timeLeft: 15,
+            ttsItem: null,
+            learned: new Set()
+        };
+
+        // ==================== INIT ====================
+        function init() {
+            loadProgress();
+            setupCategoryButtons();
+            updateScoreDisplay();
+        }
+
+        function setupCategoryButtons() {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    state.deck = this.dataset.category;
+                });
+            });
+        }
+
+        // ==================== NAVIGATION ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('#app > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function showMenu() {
+            state.mode = 'menu';
+            showScreen('menu-screen');
+            clearInterval(state.timerInterval);
+        }
+
+        // ==================== FLASHCARD ====================
+        function startFlashcard() {
+            state.mode = 'flashcard';
+            state.flashcardIndex = 0;
+            state.isFlipped = false;
+            showScreen('flashcard-screen');
+            renderFlashcard();
+        }
+
+        function renderFlashcard() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            const card = deck[state.flashcardIndex];
+            if (!card) return;
+
+            document.getElementById('fc-emoji').textContent = card.emoji;
+            document.getElementById('fc-term').textContent = card.term;
+            document.getElementById('fc-emoji-back').textContent = card.emoji;
+            document.getElementById('fc-definition').textContent = card.definition;
+            document.getElementById('fc-function').textContent = card.function || '';
+            document.getElementById('fc-hint').textContent = (card.hint || card.comparison) ? `💡 ${card.hint || card.comparison}` : '';
+            document.getElementById('fc-current').textContent = state.flashcardIndex + 1;
+            document.getElementById('fc-total').textContent = deck.length;
+
+            const progress = ((state.flashcardIndex + 1) / deck.length) * 100;
+            document.getElementById('flashcard-progress').style.width = progress + '%';
+
+            document.getElementById('flashcard').classList.remove('flipped');
+            state.isFlipped = false;
+        }
+
+        function flipCard() {
+            state.isFlipped = !state.isFlipped;
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function nextFlashcard() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            state.flashcardIndex = (state.flashcardIndex + 1) % deck.length;
+            renderFlashcard();
+        }
+
+        function prevFlashcard() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            state.flashcardIndex = (state.flashcardIndex - 1 + deck.length) % deck.length;
+            renderFlashcard();
+        }
+
+        function markMastered() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            const card = deck[state.flashcardIndex];
+            state.learned.add(card.term + '-' + state.deck);
+            state.score += 10;
+            state.streak += 1;
+            if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+            updateScoreDisplay();
+            saveProgress();
+            alert('✅ Kerja bagus! Kartu ini ditandai sudah hafal. +10 poin');
+            nextFlashcard();
+        }
+
+        // ==================== QUIZ ====================
+        function startQuiz() {
+            state.mode = 'quiz';
+            state.currentQuestion = 0;
+            state.correctAnswers = 0;
+            state.score = 0;
+            state.streak = 0;
+            state.bestStreak = 0;
+            state.selectedAnswer = null;
+            showScreen('quiz-screen');
+            generateQuizQuestions();
+            renderQuizQuestion();
+        }
+
+        function generateQuizQuestions() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            const shuffled = [...deck].sort(() => Math.random() - 0.5);
+            state.quizQuestions = shuffled.slice(0, Math.min(10, shuffled.length));
+        }
+
+        function renderQuizQuestion() {
+            if (state.currentQuestion >= state.quizQuestions.length) {
+                showResult();
+                return;
+            }
+
+            const q = state.quizQuestions[state.currentQuestion];
+            state.selectedAnswer = null;
+            state.showResult = false;
+
+            document.getElementById('quiz-question').textContent = q.term;
+            document.getElementById('quiz-feedback').className = 'quiz-feedback';
+            document.getElementById('quiz-feedback').style.display = 'none';
+
+            const options = generateOptions(q);
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(idx, q.term, options);
+                optionsContainer.appendChild(btn);
+            });
+
+            const progress = ((state.currentQuestion) / state.quizQuestions.length) * 100;
+            document.getElementById('quiz-progress').style.width = progress + '%';
+
+            startTimer();
+        }
+
+        function generateOptions(correctAnswer) {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            const allTerms = deck.map(item => item.term);
+            const wrongAnswers = allTerms.filter(t => t !== correctAnswer.term);
+            const shuffled = wrongAnswers.sort(() => Math.random() - 0.5);
+            const options = [correctAnswer.term, ...shuffled.slice(0, 3)];
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function selectAnswer(selectedIdx, correctTerm, options) {
+            if (state.showResult) return;
+            state.showResult = true;
+            clearInterval(state.timerInterval);
+
+            const selected = options[selectedIdx];
+            const isCorrect = selected === correctTerm;
+            const optionButtons = document.querySelectorAll('.quiz-option');
+
+            optionButtons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (options[idx] === correctTerm) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIdx && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.style.display = 'block';
+
+            if (isCorrect) {
+                state.correctAnswers++;
+                state.streak++;
+                const bonus = state.streak > 1 ? (state.streak - 1) * 5 : 0;
+                state.score += 20 + bonus;
+                if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+                feedback.className = 'quiz-feedback correct';
+                feedback.innerHTML = `✅ Benar! +20 poin${bonus > 0 ? ` +${bonus} streak bonus` : ''}`;
+            } else {
+                state.streak = 0;
+                feedback.className = 'quiz-feedback wrong';
+                feedback.innerHTML = `❌ Salah! Jawaban yang benar: <strong>${correctTerm}</strong>`;
+            }
+
+            updateScoreDisplay();
+            saveProgress();
+
+            setTimeout(() => {
+                state.currentQuestion++;
+                renderQuizQuestion();
+            }, 2000);
+        }
+
+        function startTimer() {
+            clearInterval(state.timerInterval);
+            state.timeLeft = 15;
+            const timerEl = document.getElementById('quiz-timer');
+            timerEl.textContent = state.timeLeft;
+            timerEl.className = 'timer';
+
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                timerEl.textContent = state.timeLeft;
+                if (state.timeLeft <= 5) {
+                    timerEl.className = 'timer warning';
+                }
+                if (state.timeLeft <= 0) {
+                    clearInterval(state.timerInterval);
+                    if (!state.showResult) {
+                        state.streak = 0;
+                        state.showResult = true;
+                        const feedback = document.getElementById('quiz-feedback');
+                        feedback.style.display = 'block';
+                        feedback.className = 'quiz-feedback wrong';
+                        const q = state.quizQuestions[state.currentQuestion];
+                        feedback.innerHTML = `⏰ Waktu habis! Jawaban: <strong>${q.term}</strong>`;
+                        updateScoreDisplay();
+                        saveProgress();
+                        setTimeout(() => {
+                            state.currentQuestion++;
+                            renderQuizQuestion();
+                        }, 2000);
+                    }
+                }
+            }, 1000);
+        }
+
+        function showResult() {
+            clearInterval(state.timerInterval);
+            showScreen('result-screen');
+
+            const total = state.quizQuestions.length;
+            const correct = state.correctAnswers;
+            const accuracy = Math.round((correct / total) * 100);
+
+            document.getElementById('final-score').textContent = state.score;
+            document.getElementById('stat-correct').textContent = correct;
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-accuracy').textContent = accuracy + '%';
+            document.getElementById('stat-best').textContent = state.bestStreak;
+
+            let message = '';
+            if (accuracy === 100) message = '🎯 Sempurna! Kamu adalah ahli biologi!';
+            else if (accuracy >= 80) message = '🌟 Luar biasa! Pertahankan!';
+            else if (accuracy >= 60) message = '👍 Bagus! Masih perlu latihan';
+            else if (accuracy >= 40) message = '📚 Coba lagi, kamu pasti bisa!';
+            else message = '💪 Jangan menyerah, terus belajar!';
+            document.getElementById('result-message').textContent = message;
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // ==================== TTS CHALLENGE ====================
+        function startTTS() {
+            state.mode = 'tts';
+            showScreen('tts-screen');
+            loadTTSQuestion();
+        }
+
+        function loadTTSQuestion() {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            state.ttsItem = deck[Math.floor(Math.random() * deck.length)];
+            document.getElementById('tts-input').value = '';
+            document.getElementById('tts-feedback').style.display = 'none';
+            document.getElementById('speak-btn').disabled = false;
+
+            const options = generateTTTOptions(state.ttsItem);
+            const container = document.getElementById('tts-options');
+            container.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => checkTTSItem(opt);
+                container.appendChild(btn);
+            });
+        }
+
+        function generateTTTOptions(correctItem) {
+            const deck = biologyData[state.deck] || biologyData.organelles;
+            const wrongAnswers = deck.filter(item => item.term !== correctItem.term);
+            const shuffled = wrongAnswers.sort(() => Math.random() - 0.5);
+            const options = [correctItem.term, ...shuffled.slice(0, 3).map(i => i.term)];
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function speakDefinition() {
+            if (!state.ttsItem) return;
+            const text = state.ttsItem.definition;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            speechSynthesis.speak(utterance);
+            document.getElementById('speak-btn').disabled = true;
+            setTimeout(() => {
+                document.getElementById('speak-btn').disabled = false;
+            }, 3000);
+        }
+
+        function checkTTSAnswer() {
+            const input = document.getElementById('tts-input').value.trim();
+            if (!input) return;
+            checkTTSItem(input);
+        }
+
+        function checkTTSItem(answer) {
+            const feedback = document.getElementById('tts-feedback');
+            const isCorrect = answer.toLowerCase() === state.ttsItem.term.toLowerCase();
+
+            if (isCorrect) {
+                state.score += 30;
+                state.streak++;
+                if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+                feedback.style.display = 'block';
+                feedback.className = 'quiz-feedback correct';
+                feedback.textContent = `✅ Benar! Itu ${state.ttsItem.term}! +30 poin`;
+                state.learned.add(state.ttsItem.term + '-' + state.deck);
+                updateScoreDisplay();
+                saveProgress();
+            } else {
+                state.streak = 0;
+                feedback.style.display = 'block';
+                feedback.className = 'quiz-feedback wrong';
+                feedback.textContent = `❌ Salah! Jawaban: ${state.ttsItem.term}`;
+            }
+
+            setTimeout(() => {
+                loadTTSQuestion();
+            }, 2500);
+        }
+
+        // ==================== STORAGE ====================
+        function saveProgress() {
+            const data = {
+                score: state.score,
+                bestStreak: state.bestStreak,
+                learned: Array.from(state.learned),
+                deck: state.deck
+            };
+            localStorage.setItem('bioCellProgress', JSON.stringify(data));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('bioCellProgress');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    state.score = data.score || 0;
+                    state.bestStreak = data.bestStreak || 0;
+                    state.learned = new Set(data.learned || []);
+                    if (data.deck) state.deck = data.deck;
+                } catch (e) {
+                    console.error('Failed to load progress:', e);
+                }
+            }
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('score').textContent = state.score;
+            document.getElementById('streak').textContent = state.streak;
+            document.getElementById('learned').textContent = state.learned.size;
+        }
+
+        // ==================== INIT ====================
+        init();
+    </script>
+</body>
+</html>
